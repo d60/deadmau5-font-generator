@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>deadmau5 Font Generator</h1>
+    <div>
+        <div>
+            <label>
+                black preview
+                <input type="checkbox" class="black-preview-toggle">
+            </label>
+        </div>
+        <!-- <div>
+            <button class="random-btn">random</button>
+        </div> -->
+    </div>
+    <canvas class="main-canvas" width="0" height="0"></canvas>
+
+    <div>
+        <div>
+            <label>
+                text
+                <input class="text" type="text">
+            </label>
+        </div>
+        <div>
+            <label>
+                color
+                <input type="color">
+            </label>
+        </div>
+        <div class="fonts">
+            <!-- <label>
+                Font1
+                <input type="radio" name="font" value="arial5" checked>
+            </label>
+            <label>
+                Font2
+                <input type="radio" name="font" value="helvetica5">
+            </label> -->
+        </div>
+        <div>
+            <label>
+                size
+                <input type="number" class="font-size" value="96">
+                px
+            </label>
+        </div>
+        <div>
+            <label>
+                vertical scale
+                <input type="number" step="0.1" class="vscale" value="1.0">
+                ×
+            </label>
+        </div>
+        <button class="draw-btn">draw</button>
+    </div>
+
+    <div>
+        <h2>↓↓↓download↓↓↓</h2>
+        <img class="download-img" width="350">
+    </div>
+
+    <script>
+        const fontsConfig = {
+            arial5: {
+                letterspaceRate: 0.8,
+                vscaleCorrection: 1.0,
+                file: 'fonts/arial.ttf',
+                default: true
+            },
+            helvetica5: {
+                letterspaceRate: 0.85,
+                vscaleCorrection: 0.9,
+                file: 'fonts/helvetica.ttf'
+            }
+        }
+        const presets = [
+            [
+                'strobe',
+                '#8000a3',
+                1.0,
+                'arial5'
+            ],
+            [
+                'random album title.',
+                '#bb0000',
+                1.0,
+                'arial5'
+            ],
+            [
+                'FAXING BERLIN',
+                '#00a3cc',
+                1.0,
+                'helvetica5'
+            ]
+        ]
+
+        async function loadFonts() {
+            const fontsWrap = document.querySelector('.fonts');
+            let i = 0;
+            for (const name of Object.keys(fontsConfig)) {
+                i += 1;
+                const fontConf = fontsConfig[name];
+                const font = new FontFace(name, `url(${fontConf.file})`)
+                document.fonts.add(font)
+                await font.load()
+
+                fontsWrap.innerHTML += `
+                <label>
+                    Font${i}
+                    <input type="radio" name="font" value="${name}" ${fontConf.default ? "checked" : ""}>
+                </label>`
+            };
+        }
+        window.addEventListener('load', async () => {
+            await loadFonts();
+            drawText('deadmau5', `96px arial5`, '#000000', 0.8, 1.0);
+        });
+
+        function drawText(text, font, color, letterspaceRate, vscale) {
+            const canvas = document.querySelector('.main-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.font = font;
+            const metrics = ctx.measureText(text);
+
+            const height = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+            canvas.height = height * vscale;
+            const fullWidth = metrics.width;
+            canvas.width = fullWidth;
+
+            ctx.font = font;
+            let canvasWidth = fullWidth;
+            Array.from(text).slice(0, -1).forEach(c => {
+                const chmetrics = ctx.measureText(c);
+                canvasWidth -= chmetrics.width * (1 - letterspaceRate);
+            });
+
+            canvas.width = canvasWidth;
+
+            ctx.save();
+            ctx.scale(1, vscale);
+
+
+            // if (blackBackgroundPreview) {
+            //     console.log('sdoi')
+            //     ctx.fillStyle = '#000000';
+            //     ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // } else {
+            //     ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // }
+
+            ctx.textBaseline = 'alphabetic';
+            ctx.font = font;
+            ctx.fillStyle = color;
+
+            const baselineY = metrics.actualBoundingBoxAscent;
+            let offsetX = 0;
+            Array.from(text).forEach(c => {
+                const chmetrics = ctx.measureText(c);
+                ctx.fillText(c, offsetX, baselineY);
+                offsetX += chmetrics.width * letterspaceRate;
+            });
+
+            document.querySelector('.download-img').src = canvas.toDataURL('image/png');
+        }
+
+        function loadPreset(preset) {
+            document.querySelector('.text').value = preset[0]
+            const color = document.querySelector('input[type="color"]').value = preset[1];
+            const vscale = document.querySelector('.vscale').value = preset[2];
+            const font = document.querySelector(`input[type="radio"][value="${preset[3]}"]`).checked = true;
+            document.querySelector('.draw-btn').click();
+        }
+
+        document.querySelector('.draw-btn').onclick = () => {
+            const font = document.querySelector('input[type="radio"][name="font"]:checked').value;
+            const color = document.querySelector('input[type="color"]').value;
+            const size = document.querySelector('.font-size').value;
+            const vscale = document.querySelector('.vscale').value;
+
+            const letterspaceRate = fontsConfig[font].letterspaceRate;
+            const vscaleCorrection = fontsConfig[font].vscaleCorrection;
+            drawText(
+                document.querySelector('.text').value,
+                `${size}px ${font}`,
+                color,
+                letterspaceRate,
+                vscale * vscaleCorrection,
+            );
+        };
+
+        document.querySelector('.random-btn').onclick = () => {
+            loadPreset(
+                presets[
+                    Math.floor(Math.random() * presets.length)
+                ]
+            )
+        }
+
+        document.querySelector('.black-preview-toggle').addEventListener('change', e => {
+            let color
+            if (e.target.checked) {
+                color = '#000000';
+            } else {
+                color = null;
+            }
+            document.querySelector('.main-canvas').style.backgroundColor = color;
+        });
+    </script>
+
+    <style>
+        canvas {
+            border: 1px black solid;
+            max-width: 100%;
+        }
+
+        .download-img {
+            border: 1px black solid;
+        }
+    </style>
+</body>
+</html>
