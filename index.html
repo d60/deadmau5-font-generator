@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+    <link rel="stylesheet" href="style.css">
     <title>Document</title>
 </head>
 <body>
@@ -14,57 +15,57 @@
                 <input type="checkbox" class="black-preview-toggle">
             </label>
         </div>
-        <!-- <div>
-            <button class="random-btn">random</button>
-        </div> -->
     </div>
     <canvas class="main-canvas" width="0" height="0"></canvas>
 
-    <div>
+    <div class="config-wrap">
         <div>
-            <label>
-                text
-                <input class="text" type="text">
-            </label>
+            <label for="text">text</label>
+            <input id="text" class="text" type="text">
         </div>
         <div>
-            <label>
-                color
-                <input type="color">
-            </label>
-        </div>
-        <div class="fonts">
-            <!-- <label>
-                Font1
-                <input type="radio" name="font" value="arial5" checked>
-            </label>
-            <label>
-                Font2
-                <input type="radio" name="font" value="helvetica5">
-            </label> -->
+            <label for="color">color</label>
+            <input id="color" type="color">
         </div>
         <div>
-            <label>
-                size
-                <input type="number" class="font-size" value="96">
-                px
-            </label>
+            <label>font</label>
+            <div class="fonts radio-row"></div>
         </div>
         <div>
-            <label>
-                vertical scale
-                <input type="number" step="0.1" class="vscale" value="1.0">
-                ×
-            </label>
+            <label for="font-size">font size(px)</label>
+            <input id="font-size" type="number" class="font-size" value="96">
         </div>
-        <button class="draw-btn">draw</button>
+        <div>
+            <label for="vscale">vertical scale(x)</label>
+            <input id="vscale" type="number" step="0.1" class="vscale" value="1.0">
+        </div>
+        <div>
+            <label>mode</label>
+            <div class="radio-row mode-select">
+                <div>
+                    <label for="line">line</label>
+                    <input id="line" type="radio" name="render-mode" value="line" checked>
+                </div>
+                <div>
+                    <label for="circle">circle</label>
+                    <input id="circle" type="radio" name="render-mode" value="circle">
+                </div>
+            </div>
+        </div>
+        <div class="radius-input additional-config">
+            <label for="radius">radius(px)</label>
+            <input id="radius" class="radius" type="number" value="200">
+        </div>
     </div>
+
+    <button class="draw-btn">draw</button>
 
     <div>
         <h2>↓↓↓download↓↓↓</h2>
         <img class="download-img">
     </div>
 
+    <script src="renderer.js"></script>
     <script>
         const fontsConfig = {
             arial5: {
@@ -79,26 +80,6 @@
                 file: 'fonts/helvetica.ttf'
             }
         }
-        const presets = [
-            [
-                'strobe',
-                '#8000a3',
-                1.0,
-                'arial5'
-            ],
-            [
-                'random album title.',
-                '#bb0000',
-                1.0,
-                'arial5'
-            ],
-            [
-                'FAXING BERLIN',
-                '#00a3cc',
-                1.0,
-                'helvetica5'
-            ]
-        ]
 
         async function loadFonts() {
             const fontsWrap = document.querySelector('.fonts');
@@ -111,96 +92,61 @@
                 await font.load()
 
                 fontsWrap.innerHTML += `
-                <label>
-                    Font${i}
-                    <input type="radio" name="font" value="${name}" ${fontConf.default ? "checked" : ""}>
-                </label>`
+                <div>
+                    <label for="font${i}">Font${i}</label>
+                    <input id="font${i}" type="radio" name="font" value="${name}" ${fontConf.default ? "checked" : ""}>
+                </div>`
             };
         }
         window.addEventListener('load', async () => {
             await loadFonts();
-            drawText('deadmau5', `96px arial5`, '#000000', 0.8, 1.0);
+            document.querySelector('.text').value = 'deadmau5';
+            document.querySelector('input[type="color"]').value = '#000000';
+            document.querySelector('.font-size').value = '86';
+            document.querySelector('.vscale').value = 1.0;
+            document.querySelector('.draw-btn').click();
         });
 
-        function drawText(text, font, color, letterspaceRate, vscale) {
-            const canvas = document.querySelector('.main-canvas');
-            const ctx = canvas.getContext('2d');
-            ctx.font = font;
-            const metrics = ctx.measureText(text);
+        function drawText(rendererClass, options) {
+            const renderer = new rendererClass(options);
+            renderer.render()
 
-            const height = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
-            canvas.height = height * vscale;
-            const fullWidth = metrics.width;
-            canvas.width = fullWidth;
-
-            ctx.font = font;
-            let canvasWidth = fullWidth;
-            Array.from(text).slice(0, -1).forEach(c => {
-                const chmetrics = ctx.measureText(c);
-                canvasWidth -= chmetrics.width * (1 - letterspaceRate);
-            });
-
-            canvas.width = canvasWidth;
-
-            ctx.save();
-            ctx.scale(1, vscale);
-
-
-            // if (blackBackgroundPreview) {
-            //     console.log('sdoi')
-            //     ctx.fillStyle = '#000000';
-            //     ctx.fillRect(0, 0, canvas.width, canvas.height);
-            // } else {
-            //     ctx.clearRect(0, 0, canvas.width, canvas.height);
-            // }
-
-            ctx.textBaseline = 'alphabetic';
-            ctx.font = font;
-            ctx.fillStyle = color;
-
-            const baselineY = metrics.actualBoundingBoxAscent;
-            let offsetX = 0;
-            Array.from(text).forEach(c => {
-                const chmetrics = ctx.measureText(c);
-                ctx.fillText(c, offsetX, baselineY);
-                offsetX += chmetrics.width * letterspaceRate;
-            });
-
-            document.querySelector('.download-img').src = canvas.toDataURL('image/png');
-        }
-
-        function loadPreset(preset) {
-            document.querySelector('.text').value = preset[0]
-            const color = document.querySelector('input[type="color"]').value = preset[1];
-            const vscale = document.querySelector('.vscale').value = preset[2];
-            const font = document.querySelector(`input[type="radio"][value="${preset[3]}"]`).checked = true;
-            document.querySelector('.draw-btn').click();
+            document.querySelector('.download-img').src = options.canvas.toDataURL('image/png');
         }
 
         document.querySelector('.draw-btn').onclick = () => {
+            const canvas = document.querySelector('.main-canvas');
+            const text = document.querySelector('.text').value;
             const font = document.querySelector('input[type="radio"][name="font"]:checked').value;
             const color = document.querySelector('input[type="color"]').value;
             const size = document.querySelector('.font-size').value;
             const vscale = document.querySelector('.vscale').value;
+            const mode = document.querySelector('input[type="radio"][name="render-mode"]:checked').value;
 
             const letterspaceRate = fontsConfig[font].letterspaceRate;
             const vscaleCorrection = fontsConfig[font].vscaleCorrection;
-            drawText(
-                document.querySelector('.text').value,
-                `${size}px ${font}`,
-                color,
-                letterspaceRate,
-                vscale * vscaleCorrection,
-            );
-        };
 
-        // document.querySelector('.random-btn').onclick = () => {
-        //     loadPreset(
-        //         presets[
-        //             Math.floor(Math.random() * presets.length)
-        //         ]
-        //     )
-        // }
+            options = {
+                canvas: canvas,
+                text: text,
+                font: `${size}px ${font}`,
+                color: color,
+                letterspaceRate: letterspaceRate,
+                vscale: vscale * vscaleCorrection
+            };
+
+            let renderer = null
+
+            if (mode == 'circle') {
+                options.radius = Number(document.querySelector('.radius').value);
+                renderer = CircleTextRenderer;
+            } else {
+                renderer = LineTextRenderer;
+            }
+
+            console.log(renderer, options)
+            drawText(renderer, options);
+        };
 
         document.querySelector('.black-preview-toggle').addEventListener('change', e => {
             let color
@@ -210,6 +156,15 @@
                 color = null;
             }
             document.querySelector('.main-canvas').style.backgroundColor = color;
+        });
+
+        document.querySelector('.mode-select').addEventListener('change', e => {
+            const radiusInput = document.querySelector('.radius-input');
+            if (e.target.value == 'circle') {
+                radiusInput.style.display = 'block';
+            } else {
+                radiusInput.style.display = 'none';
+            }
         });
     </script>
 

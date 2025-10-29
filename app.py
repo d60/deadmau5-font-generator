@@ -7,6 +7,13 @@ app = Flask(__name__)
 def index():
     return Path('index.html').read_text('utf-8')
 
+@app.route('/renderer.js')
+def js():
+    return send_file('renderer.js')
+@app.route('/style.css')
+def css():
+    return send_file('style.css')
+
 @app.route('/fonts/<file>')
 def font(file):
     return send_file(f'fonts/{file}')
