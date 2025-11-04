@@ -102,7 +102,7 @@ window.addEventListener('load', async () => {
             }
         ]
     })
-    renderer.renderAll();
+    // renderer.renderAll();
 });
 
 document.querySelector('.add-line').onclick = () => {
