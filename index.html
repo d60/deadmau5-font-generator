@@ -7,7 +7,7 @@
     <title>Document</title>
 </head>
 <body>
-    <h1>deadmau5 Font Generator</h1>
+    <!-- <h1>deadmau5 Font Generator</h1> -->
     <div>
         <div>
             <label>
@@ -18,27 +18,7 @@
     </div>
     <canvas class="main-canvas" width="0" height="0"></canvas>
 
-    <div class="config-wrap">
-        <div>
-            <label for="text">text</label>
-            <input id="text" class="text" type="text">
-        </div>
-        <div>
-            <label for="color">color</label>
-            <input id="color" type="color">
-        </div>
-        <div>
-            <label>font</label>
-            <div class="fonts radio-row"></div>
-        </div>
-        <div>
-            <label for="font-size">font size(px)</label>
-            <input id="font-size" type="number" class="font-size" value="96">
-        </div>
-        <div>
-            <label for="vscale">vertical scale(x)</label>
-            <input id="vscale" type="number" step="0.1" class="vscale" value="1.0">
-        </div>
+    <div class="canvas-config">
         <div>
             <label>mode</label>
             <div class="radio-row mode-select">
@@ -52,10 +32,13 @@
                 </div>
             </div>
         </div>
-        <div class="radius-input additional-config">
+        <div class="radius-input display-none">
             <label for="radius">radius(px)</label>
             <input id="radius" class="radius" type="number" value="200">
         </div>
+        <div class="lines">
+        </div>
+        <button class="add-line">add line</button>
     </div>
 
     <button class="draw-btn">draw</button>
@@ -66,118 +49,6 @@
     </div>
 
     <script src="renderer.js"></script>
-    <script>
-        const fontsConfig = {
-            arial5: {
-                letterspaceRate: 0.8,
-                vscaleCorrection: 1.0,
-                file: 'fonts/arial.ttf',
-                default: true
-            },
-            helvetica5: {
-                letterspaceRate: 0.85,
-                vscaleCorrection: 0.9,
-                file: 'fonts/helvetica.ttf'
-            }
-        }
-
-        async function loadFonts() {
-            const fontsWrap = document.querySelector('.fonts');
-            let i = 0;
-            for (const name of Object.keys(fontsConfig)) {
-                i += 1;
-                const fontConf = fontsConfig[name];
-                const font = new FontFace(name, `url(${fontConf.file})`)
-                document.fonts.add(font)
-                await font.load()
-
-                fontsWrap.innerHTML += `
-                <div>
-                    <label for="font${i}">Font${i}</label>
-                    <input id="font${i}" type="radio" name="font" value="${name}" ${fontConf.default ? "checked" : ""}>
-                </div>`
-            };
-        }
-        window.addEventListener('load', async () => {
-            await loadFonts();
-            document.querySelector('.text').value = 'deadmau5';
-            document.querySelector('input[type="color"]').value = '#000000';
-            document.querySelector('.font-size').value = '86';
-            document.querySelector('.vscale').value = 1.0;
-            document.querySelector('.draw-btn').click();
-        });
-
-        function drawText(rendererClass, options) {
-            const renderer = new rendererClass(options);
-            renderer.render()
-
-            document.querySelector('.download-img').src = options.canvas.toDataURL('image/png');
-        }
-
-        document.querySelector('.draw-btn').onclick = () => {
-            const canvas = document.querySelector('.main-canvas');
-            const text = document.querySelector('.text').value;
-            const font = document.querySelector('input[type="radio"][name="font"]:checked').value;
-            const color = document.querySelector('input[type="color"]').value;
-            const size = document.querySelector('.font-size').value;
-            const vscale = document.querySelector('.vscale').value;
-            const mode = document.querySelector('input[type="radio"][name="render-mode"]:checked').value;
-
-            const letterspaceRate = fontsConfig[font].letterspaceRate;
-            const vscaleCorrection = fontsConfig[font].vscaleCorrection;
-
-            options = {
-                canvas: canvas,
-                text: text,
-                font: `${size}px ${font}`,
-                color: color,
-                letterspaceRate: letterspaceRate,
-                vscale: vscale * vscaleCorrection
-            };
-
-            let renderer = null
-
-            if (mode == 'circle') {
-                options.radius = Number(document.querySelector('.radius').value);
-                renderer = CircleTextRenderer;
-            } else {
-                renderer = LineTextRenderer;
-            }
-
-            console.log(renderer, options)
-            drawText(renderer, options);
-        };
-
-        document.querySelector('.black-preview-toggle').addEventListener('change', e => {
-            let color
-            if (e.target.checked) {
-                color = '#000000';
-            } else {
-                color = null;
-            }
-            document.querySelector('.main-canvas').style.backgroundColor = color;
-        });
-
-        document.querySelector('.mode-select').addEventListener('change', e => {
-            const radiusInput = document.querySelector('.radius-input');
-            if (e.target.value == 'circle') {
-                radiusInput.style.display = 'block';
-            } else {
-                radiusInput.style.display = 'none';
-            }
-        });
-    </script>
-
-    <style>
-        canvas {
-            border: 1px black solid;
-            max-width: 100%;
-        }
-
-        .download-img {
-            border: 1px black solid;
-            max-width: min(100%, 400px);
-        }
-    </style>
+    <script src="index.js"></script>
 </body>
 </html>

@@ -4,28 +4,37 @@ body {
     font-family: nunito;
 }
 
+.display-none {
+    display: none;
+}
+
+canvas {
+    border: 1px black solid;
+    max-width: 100%;
+}
+
+.download-img {
+    border: 1px black solid;
+    max-width: min(100%, 400px);
+}
+
 .radio-row {
     display: inline-flex;
 }
 
-.additional-config {
-    display: none;
-    font-weight: 700;
-}
-
-.config-wrap>div>label {
+.canvas-config label {
     display: inline-block;
     width: 150px;
     text-align: center;
 }
 
-.config-wrap {
-    margin-top: 15px;
-    background-color: #cacaca;
+.radio-row label {
     width: fit-content;
-    padding: 5px 10px;
 }
 
-.config-wrap>div {
-    margin-bottom: 10px;
+.lines>div {
+    width: fit-content;
+    background-color: rgb(214, 214, 214);
+    margin: 7px 0;
+    padding: 5px;
 }

@@ -7,8 +7,11 @@ app = Flask(__name__)
 def index():
     return Path('index.html').read_text('utf-8')
 
+@app.route('/index.js')
+def indexjs():
+    return send_file('index.js')
 @app.route('/renderer.js')
-def js():
+def rendererjs():
     return send_file('renderer.js')
 @app.route('/style.css')
 def css():
