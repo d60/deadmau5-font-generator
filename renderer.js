@@ -79,7 +79,6 @@ class CircleTextMultiLineRenderer extends MultilineRendererBase {
         this.ctx.textAlign = 'center';
 
         this.setFont(this.lines[0].font);
-        const metrics = this.ctx.measureText(this.lines[0].text);
         let y = 0
         for (const line of this.lines) {
             y = this.renderLine(line, y)
