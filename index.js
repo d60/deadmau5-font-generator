@@ -112,6 +112,7 @@ document.querySelector('.add-line').onclick = () => {
 
 document.querySelector('.draw-btn').onclick = () => {
     const canvas = document.querySelector('.main-canvas');
+    const fontSizeX = Number(document.querySelector('.font-size-x').value);
 
     const lines = document.querySelector('.lines').children;
     const linesConfig = [];
@@ -126,11 +127,11 @@ document.querySelector('.draw-btn').onclick = () => {
 
         linesConfig.push( {
             text: text,
-            font: `${fontSize}px ${font}`,
+            font: `${fontSize*fontSizeX}px ${font}`,
             letterspaceRate: fontsConfig[font].letterspaceRate,
             vscale: Number(vscale) * fontsConfig[font].vscaleCorrection,
-            lineSpacing: Number(lineSpacing),
-            xShift: Number(xShift),
+            lineSpacing: Number(lineSpacing)*fontSizeX,
+            xShift: Number(xShift)*fontSizeX,
             color: color
         });
     }
@@ -144,7 +145,7 @@ document.querySelector('.draw-btn').onclick = () => {
         rendererCls = LineTextMultiLineRenderer;
     } else {
         rendererCls = CircleTextMultiLineRenderer;
-        options.radius = Number(document.querySelector('.radius').value);
+        options.radius = Number(document.querySelector('.radius').value)*fontSizeX;
     }
     const renderer = new rendererCls(options);
     renderer.renderAll();
