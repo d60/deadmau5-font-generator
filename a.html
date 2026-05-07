@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <ul>
+        <li draggable="true" ondragover="dragOver(event)" ondragstart="dragStart(event)">Apples</li>
+        <li draggable="true" ondragover="dragOver(event)" ondragstart="dragStart(event)">Oranges</li>
+        <li draggable="true" ondragover="dragOver(event)" ondragstart="dragStart(event)">Bananas</li>
+        <li draggable="true" ondragover="dragOver(event)" ondragstart="dragStart(event)">Strawberries</li>
+    </ul>
+
+    <script>
+        var _el;
+
+        function dragOver(e) {
+            if (isBefore(_el, e.target))
+                e.target.parentNode.insertBefore(_el, e.target);
+            else
+                e.target.parentNode.insertBefore(_el, e.target.nextSibling);
+        }
+
+        function dragStart(e) {
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("text/plain", null);
+            _el = e.target;
+        }
+
+        function isBefore(el1, el2) {
+            if (el2.parentNode === el1.parentNode)
+                for (var cur = el1.previousSibling; cur && cur.nodeType !== 9; cur = cur.previousSibling)
+                    if (cur === el2)
+                        return true;
+            return false;
+        }
+    </script>
+</body>
+
+</html>
